@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, FlatList, StyleSheet } from 'react-native';
-import axios from 'axios';
 import { Configuration, OpenAIApi } from 'openai'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const ChatComponent = () => {
   const [data, setData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const apiKey = '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'
+  const apiKey = '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'
   const configuration = new Configuration({
     apiKey
   })
@@ -26,14 +24,14 @@ const ChatComponent = () => {
         max_tokens: 150,
         n: 1,
       })
-      const respuesta = response?.data?.choices[0]?.text?.trim();
+      const respuesta = response.data.choices[0].text.trim();
       setMessages([...messages, { content: respuesta, sender: 'bot' }]);
-
+      setData([...data, { type: 'user', text: inputMessage }, { type: 'bot', text: inputMessage }]);
       setInputMessage('');
     } catch (error) {
-      
+      console.error('Error al enviar el mensaje:', error.response);
     }
-    
+
   };
 
   return (
