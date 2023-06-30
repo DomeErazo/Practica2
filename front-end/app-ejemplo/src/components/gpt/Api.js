@@ -1,64 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, FlatList, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { Configuration, OpenAIApi } from 'openai'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const ChatComponent = () => {
+  const [data, setData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const apiKey = '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';
-  const apiUrl = 'https://api.openai.com/v1/engines/davinci/completions';
+  const apiKey = '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'
+  const configuration = new Configuration({
+    apiKey
+  })
 
-  const [data, setData] = useState([]);
+  const openai = new OpenAIApi(configuration);
 
-  // useEffect(() => {
-  //   // Recuperar la clave de API almacenada al cargar la aplicación
-  //   getApiKey();
-  // }, []);
-
-  // const getApiKey = async () => {
-  //   try {
-  //     const storedApiKey = await AsyncStorage.getItem('apiKey');
-  //     if (storedApiKey) {
-  //       setApiKey(storedApiKey);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error al obtener la clave de API:', error);
-  //   }
-  // };
 
   const sendMessage = async () => {
-    if (inputMessage.trim() === '') return;
-
-    const requestBody = {
-      prompt: inputMessage,
-      max_tokens: 50, // Número máximo de tokens de respuesta
-    };
-
     try {
-      const response = await axios.post(apiUrl, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body:{
-          model:"gpt-3.5-turbo"
-        }
-      });
+      const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `${inputMessage}`,
+        temperature: 0.1,
+        max_tokens: 150,
+        n: 1,
+      })
+      const respuesta = response?.data?.choices[0]?.text?.trim();
+      setMessages([...messages, { content: respuesta, sender: 'bot' }]);
 
-      const newMessage = response.data.choices[0].text.trim();
-      setData([...data, { type: 'user', text: inputMessage }, { type: 'bot', text: newMessage }]);
-      setMessages([...messages, { content: newMessage, sender: 'bot' }]);
       setInputMessage('');
     } catch (error) {
-      console.error('Error al enviar el mensaje:', error.response);
-
-      if (error.response && error.response.status === 401) {
-        console.error('Error de autenticación: La clave de API es inválida o no está autorizada.');
-      } else {
-        console.error('Ocurrió un error al procesar la solicitud. Por favor, inténtalo nuevamente más tarde.');
-      }
+      
     }
+    
   };
 
   return (
@@ -91,7 +66,7 @@ const ChatComponent = () => {
 
       <View>
         <TextInput
-        style={styles.input}
+          style={styles.input}
           value={inputMessage}
           onChangeText={setInputMessage}
           placeholder='Ingresa tu pregunta'
