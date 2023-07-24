@@ -7,7 +7,7 @@ const ChatComponent = () => {
   const [data, setData] = useState([]);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const apiKey = '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'
+  const apiKey = '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'
   const configuration = new Configuration({
     apiKey
   })
